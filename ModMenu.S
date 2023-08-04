@@ -12,18 +12,23 @@
 	.include "C:/devkitPro/devkitPPC/assembly/wiiu-assembly-symbols/coreinit.rpl.S" # Make sure to change driver letter or path if needed.
 	.include "C:/devkitPro/devkitPPC/assembly/wiiu-assembly-symbols/Turbo.rpx.S" # Make sure to change driver letter or path if needed.
 
+	.equiv "object::ItemOwnerProxy::_clearItemSlot", 0x0E2E3A88
+	.equiv "nn::nex::MemoryManager::Allocate", 0x0EA69CDC
+	.equiv "nn::nex::MemoryManager::Free", 0x0EA69DB0
+
 	SC0x25_KernelCopyData = 0x2500
 	CODE_LIST_START_ADDRESS = 0x01133000
 
-	offset_VPADRead = 0x0EC8EE50
+	offset_VPADRead = 0x0EC8F190
 
-	AudSceneRace = 0x10683000
-	RaceDirector = 0x1068A70C
-	ItemDirector = 0x1068A71C
-	Menu3DModelDirector = 0x1068A738
-	UIEngine = 0x1068C36C
+	AudSceneRace = 0x10683020
+	RaceDirector = 0x1068A72C
+	ItemDirector = 0x1068A73C
+	Menu3DModelDirector = 0x1068A758
+	UIEngine = 0x1068C38C
 
 	ModMenu = 0x10014000
+	ModMenu_Patches = 0x0EC9DFD0
 
 /* 	Memory Notes:
  *	0x10014000: Flag (whether the memory setup for the mod menu has completed).
@@ -76,10 +81,10 @@
 ModMenu_Main:
 		mflr r0
 		stw r0, 0x4 (r1)
-		stwu r1, -0x14 (r1)
-		stw r31, 0x10 (r1)
-		stw r30, 0xC (r1)
-		stw r29, 0x8 (r1)
+		stwu r1, -0x18 (r1)
+		stw r31, 0x14 (r1)
+		stw r30, 0x10 (r1)
+		stw r29, 0xC (r1)
 
 		lis r31, ModMenu@ha
 
@@ -158,8 +163,8 @@ ModMenu_Main_Cheats:
 		cmpwi r0, 0 # Check if race load success.
 		beq ModMenu_Main_Cheats_Delete
 
-		lis r0, "object::IsRaceState()"@h
-		ori r0, r0, "object::IsRaceState()"@l
+		lis r0, "object::IsRaceState"@h
+		ori r0, r0, "object::IsRaceState"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
@@ -203,12 +208,12 @@ ModMenu_Main_Cheats_Init:
 		bl ModMenu_Cheats_Init
 
 ModMenu_Main_Exit:
-		lwz r29, 0x8 (r1)
-		lwz r30, 0xC (r1)
-		lwz r31, 0x10 (r1)
-		lwz r0, 0x18 (r1)
+		lwz r29, 0xC (r1)
+		lwz r30, 0x10 (r1)
+		lwz r31, 0x14 (r1)
+		lwz r0, 0x1C (r1)
 		mtlr r0
-		addi r1, r1, 0x14
+		addi r1, r1, 0x18
 		blr
 	.endfunc
 
@@ -221,8 +226,8 @@ ModMenu_ModMenu:
 		stwu r1, -0x8 (r1)
 
 		li r3, 0x10
-		lis r0, "nn::nex::MemoryManager::Allocate()"@h
-		ori r0, r0, "nn::nex::MemoryManager::Allocate()"@l
+		lis r0, "nn::nex::MemoryManager::Allocate"@h
+		ori r0, r0, "nn::nex::MemoryManager::Allocate"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
@@ -252,8 +257,8 @@ ModMenu_Cheats:
 
 		rlwinm r3, r0, 2, 0, 29
 		addi r3, r3, 0x28
-		lis r0, "nn::nex::MemoryManager::Allocate()"@h
-		ori r0, r0, "nn::nex::MemoryManager::Allocate()"@l
+		lis r0, "nn::nex::MemoryManager::Allocate"@h
+		ori r0, r0, "nn::nex::MemoryManager::Allocate"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
@@ -283,8 +288,8 @@ ModMenu_Setup:
 		bne ModMenu_Setup_Init
 
 		li r3, 0x14
-		lis r0, "nn::nex::MemoryManager::Allocate()"@h
-		ori r0, r0, "nn::nex::MemoryManager::Allocate()"@l
+		lis r0, "nn::nex::MemoryManager::Allocate"@h
+		ori r0, r0, "nn::nex::MemoryManager::Allocate"@l
 		mtctr r0
 		bctrl
 		mr. r31, r3
@@ -292,15 +297,15 @@ ModMenu_Setup:
 
 ModMenu_Setup_Init:
 		li r3, 0xB4
-		lis r0, "nn::nex::MemoryManager::Allocate()"@h
-		ori r0, r0, "nn::nex::MemoryManager::Allocate()"@l
+		lis r0, "nn::nex::MemoryManager::Allocate"@h
+		ori r0, r0, "nn::nex::MemoryManager::Allocate"@l
 		mtctr r0
 		bctrl
 		stw r3, 0 (r31) # VPADRead *
 
 		li r3, 0x320
-		lis r0, "nn::nex::MemoryManager::Allocate()"@h
-		ori r0, r0, "nn::nex::MemoryManager::Allocate()"@l
+		lis r0, "nn::nex::MemoryManager::Allocate"@h
+		ori r0, r0, "nn::nex::MemoryManager::Allocate"@l
 		mtctr r0
 		bctrl
 		stw r3, 0x4 (r31) # wstring *
@@ -312,8 +317,8 @@ ModMenu_Setup_Init:
 		bla "OSBlockMove"
 
 		li r3, 0x14
-		lis r0, "nn::nex::MemoryManager::Allocate()"@h
-		ori r0, r0, "nn::nex::MemoryManager::Allocate()"@l
+		lis r0, "nn::nex::MemoryManager::Allocate"@h
+		ori r0, r0, "nn::nex::MemoryManager::Allocate"@l
 		mtctr r0
 		bctrl
 		stw r3, 0x8 (r31) # ModMenu_ModMenu_Cheats_PageArray *
@@ -321,8 +326,8 @@ ModMenu_Setup_Init:
 
 		li r29, ModMenu_ModMenu_Cheats_Page1_Length
 		addi r3, r29, 0x4
-		lis r0, "nn::nex::MemoryManager::Allocate()"@h
-		ori r0, r0, "nn::nex::MemoryManager::Allocate()"@l
+		lis r0, "nn::nex::MemoryManager::Allocate"@h
+		ori r0, r0, "nn::nex::MemoryManager::Allocate"@l
 		mtctr r0
 		bctrl
 		stw r3, 0x4 (r30) # ModMenu_ModMenu_Cheats_Page1 *
@@ -337,8 +342,8 @@ ModMenu_Setup_Init:
 
 		li r29, ModMenu_ModMenu_Cheats_Page2_Length
 		addi r3, r29, 0x4
-		lis r0, "nn::nex::MemoryManager::Allocate()"@h
-		ori r0, r0, "nn::nex::MemoryManager::Allocate()"@l
+		lis r0, "nn::nex::MemoryManager::Allocate"@h
+		ori r0, r0, "nn::nex::MemoryManager::Allocate"@l
 		mtctr r0
 		bctrl
 		stw r3, 0x8 (r30) # ModMenu_ModMenu_Cheats_Page2 *
@@ -353,8 +358,8 @@ ModMenu_Setup_Init:
 
 		li r29, ModMenu_ModMenu_Cheats_Page3_Length
 		addi r3, r29, 0x4
-		lis r0, "nn::nex::MemoryManager::Allocate()"@h
-		ori r0, r0, "nn::nex::MemoryManager::Allocate()"@l
+		lis r0, "nn::nex::MemoryManager::Allocate"@h
+		ori r0, r0, "nn::nex::MemoryManager::Allocate"@l
 		mtctr r0
 		bctrl
 		stw r3, 0xC (r30) # ModMenu_ModMenu_Cheats_Page3 *
@@ -369,8 +374,8 @@ ModMenu_Setup_Init:
 
 		li r29, ModMenu_ModMenu_Cheats_Page4_Length
 		addi r3, r29, 0x4
-		lis r0, "nn::nex::MemoryManager::Allocate()"@h
-		ori r0, r0, "nn::nex::MemoryManager::Allocate()"@l
+		lis r0, "nn::nex::MemoryManager::Allocate"@h
+		ori r0, r0, "nn::nex::MemoryManager::Allocate"@l
 		mtctr r0
 		bctrl
 		stw r3, 0x10 (r30) # ModMenu_ModMenu_Cheats_Page4 *
@@ -388,8 +393,8 @@ ModMenu_Setup_Init:
 		stw r0, 0xC (r31)
 
 		li r3, 0x14
-		lis r0, "nn::nex::MemoryManager::Allocate()"@h
-		ori r0, r0, "nn::nex::MemoryManager::Allocate()"@l
+		lis r0, "nn::nex::MemoryManager::Allocate"@h
+		ori r0, r0, "nn::nex::MemoryManager::Allocate"@l
 		mtctr r0
 		bctrl
 		stw r3, 0x10 (r31) # ModMenu_Cheats_EnabledArray *
@@ -428,8 +433,8 @@ ModMenu_Cheats_Setup:
 
 		rlwinm r3, r31, 2, 0, 29
 		addi r3, r3, 0x28
-		lis r0, "nn::nex::MemoryManager::Allocate()"@h
-		ori r0, r0, "nn::nex::MemoryManager::Allocate()"@l
+		lis r0, "nn::nex::MemoryManager::Allocate"@h
+		ori r0, r0, "nn::nex::MemoryManager::Allocate"@l
 		mtctr r0
 		bctrl
 		mr. r30, r3
@@ -443,8 +448,8 @@ ModMenu_Cheats_Setup_Init:
 
 ModMenu_Cheats_Setup_NextSlot:
 		li r3, 0x40
-		lis r0, "nn::nex::MemoryManager::Allocate()"@h
-		ori r0, r0, "nn::nex::MemoryManager::Allocate()"@l
+		lis r0, "nn::nex::MemoryManager::Allocate"@h
+		ori r0, r0, "nn::nex::MemoryManager::Allocate"@l
 		mtctr r0
 		bctrl
 		stwu r3, 0x4 (r29) # ModMenu_Cheats_LocalPlayerX_CheatArray *
@@ -492,8 +497,8 @@ ModMenu_Cheats_Delete:
 
 ModMenu_Cheats_Delete_NextSlot:
 		lwzu r3, 0x4 (r28)
-		lis r0, "FUN_0EA69A68:nn::nex::MemoryManager::Free()"@h
-		ori r0, r0, "FUN_0EA69A68:nn::nex::MemoryManager::Free()"@l
+		lis r0, "nn::nex::MemoryManager::Free"@h
+		ori r0, r0, "nn::nex::MemoryManager::Free"@l
 		mtctr r0
 		bctrl
 		stw r29, 0 (r28)
@@ -502,8 +507,8 @@ ModMenu_Cheats_Delete_NextSlot:
 
 		stw r29, 0 (r31)
 		mr r3, r31
-		lis r0, "FUN_0EA69A68:nn::nex::MemoryManager::Free()"@h
-		ori r0, r0, "FUN_0EA69A68:nn::nex::MemoryManager::Free()"@l
+		lis r0, "nn::nex::MemoryManager::Free"@h
+		ori r0, r0, "nn::nex::MemoryManager::Free"@l
 		mtctr r0
 		bctrl
 
@@ -528,8 +533,8 @@ ModMenu_Init:
 
 		mr r31, r3
 
-		lis r0, "ui::GetDialog()"@h
-		ori r0, r0, "ui::GetDialog()"@l
+		lis r0, "ui::GetDialog"@h
+		ori r0, r0, "ui::GetDialog"@l
 		mtctr r0
 		bctrl
 		mr r30, r3
@@ -556,8 +561,8 @@ ModMenu_Init_TryToggle:
 		cmpwi r0, 0
 		bne ModMenu_Init_Exit
 
-		lis r0, "ui::Page_Dialog::isClose()"@h
-		ori r0, r0, "ui::Page_Dialog::isClose()"@l
+		lis r0, "ui::Page_Dialog::isClose"@h
+		ori r0, r0, "ui::Page_Dialog::isClose"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
@@ -580,8 +585,8 @@ ModMenu_Init_TryToggle:
 
 ModMenu_Init_CloseDialog:
 		mr r3, r30
-		lis r0, "ui::Page_Dialog::close()"@h
-		ori r0, r0, "ui::Page_Dialog::close()"@l
+		lis r0, "ui::Page_Dialog::close"@h
+		ori r0, r0, "ui::Page_Dialog::close"@l
 		mtctr r0
 		bctrl
 		li r0, 0
@@ -592,8 +597,8 @@ ModMenu_Init_CheckActivators:
 		lbz r5, 0xE (r31)
 		cmpwi r5, 0
 		beq ModMenu_Init_Exit
-		lis r0, "ui::Page_Dialog::isClose()"@h
-		ori r0, r0, "ui::Page_Dialog::isClose()"@l
+		lis r0, "ui::Page_Dialog::isClose"@h
+		ori r0, r0, "ui::Page_Dialog::isClose"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
@@ -1272,22 +1277,22 @@ ModMenu_RequestDialog:
 		cmpwi r3, 0 # Check if UI is being loaded.
 		bne ModMenu_RequestDialog_Exit
 
-		lis r0, "ui::GetDialog()"@h
-		ori r0, r0, "ui::GetDialog()"@l
+		lis r0, "ui::GetDialog"@h
+		ori r0, r0, "ui::GetDialog"@l
 		mtctr r0
 		bctrl
 
 		mr r31, r3
 
-		lis r0, "ui::Page_Dialog::isClose()"@h
-		ori r0, r0, "ui::Page_Dialog::isClose()"@l
+		lis r0, "ui::Page_Dialog::isClose"@h
+		ori r0, r0, "ui::Page_Dialog::isClose"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
 		beq ModMenu_RequestDialog_Update
 
-		lis r0, "ui::Page_Dialog::in_()"@h
-		ori r0, r0, "ui::Page_Dialog::in_()"@l
+		lis r0, "ui::Page_Dialog::in_"@h
+		ori r0, r0, "ui::Page_Dialog::in_"@l
 		mtctr r0
 		mr r3, r31
 		bctrl
@@ -1300,8 +1305,8 @@ ModMenu_RequestDialog_Update:
 		lwz r4, 0x5C (r4)
 		li r5, -1
 		li r6, 1
-		lis r0, "ui::RegisterScalableFontText()"@h
-		ori r0, r0, "ui::RegisterScalableFontText()"@l
+		lis r0, "ui::RegisterScalableFontText"@h
+		ori r0, r0, "ui::RegisterScalableFontText"@l
 		mtctr r0
 		bctrl
 
@@ -1404,14 +1409,14 @@ ModMenu_ChangeMenuBG:
 		stw r0, 0x4 (r1)
 		stwu r1, -0x8 (r1)
 
-		lis r0, "FID_conflict:ui::GetBg()"@h
-		ori r0, r0, "FID_conflict:ui::GetBg()"@l
+		lis r0, "ui::GetBg"@h
+		ori r0, r0, "ui::GetBg"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
 		beq ModMenu_ChangeMenuBG_Exit
-		lis r0, "ui::Page_Bg::animKeepWiFi()"@h
-		ori r0, r0, "ui::Page_Bg::animKeepWiFi()"@l
+		lis r0, "ui::Page_Bg::animKeepWiFi"@h
+		ori r0, r0, "ui::Page_Bg::animKeepWiFi"@l
 		mtctr r0
 		bctrl
 
@@ -1428,8 +1433,8 @@ ModMenu_ChangeMenuBG:
 		beq ModMenu_ChangeMenuBG_Exit
 
 		li r4, 1
-		lis r0, "object::Menu3DModelDirector::informBeginWiFi()"@h
-		ori r0, r0, "object::Menu3DModelDirector::informBeginWiFi()"@l
+		lis r0, 0x0E6EDEF8@h
+		ori r0, r0, 0x0E6EDEF8@l
 		mtctr r0
 		bctrl
 
@@ -1460,16 +1465,16 @@ Aimbot:
 		beq Aimbot_Clear
 
 		lwz r3, 0 (r31)
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 		mr r30, r3
 
 		lwz r3, 0x4 (r30)
 		lwz r3, 0x8 (r3)
-		lis r0, "object::KartVehicleControl::getRaceController()"@h
-		ori r0, r0, "object::KartVehicleControl::getRaceController()"@l
+		lis r0, "object::KartVehicleControl::getRaceController"@h
+		ori r0, r0, "object::KartVehicleControl::getRaceController"@l
 		mtctr r0
 		bctrl
 		lwz r5, 0x1A4 (r3)
@@ -1489,16 +1494,16 @@ Aimbot_TryExecute:
 
 		lwz r3, 0x14 (r30)
 		lwz r3, 0x20C (r3)
-		lis r0, "object::KartInfoProxy::getPos()"@h
-		ori r0, r0, "object::KartInfoProxy::getPos()"@l
+		lis r0, "object::KartInfoProxy::getPos"@h
+		ori r0, r0, "object::KartInfoProxy::getPos"@l
 		mtctr r0
 		bctrl
 		mr r29, r3
 
 		lwz r3, 0x14 (r30)
 		lwz r3, 0x20C (r3)
-		lis r0, "object::KartInfoProxy::isJugemHang()"@h
-		ori r0, r0, "object::KartInfoProxy::isJugemHang()"@l
+		lis r0, "object::KartInfoProxy::isJugemHang"@h
+		ori r0, r0, "object::KartInfoProxy::isJugemHang"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
@@ -1506,8 +1511,8 @@ Aimbot_TryExecute:
 
 		lwz r3, 0x14 (r30)
 		lwz r3, 0x20C (r3)
-		lis r0, "object::KartInfoProxy::isAntiG()"@h
-		ori r0, r0, "object::KartInfoProxy::isAntiG()"@l
+		lis r0, "object::KartInfoProxy::isAntiG"@h
+		ori r0, r0, "object::KartInfoProxy::isAntiG"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
@@ -1529,14 +1534,14 @@ Aimbot_TryExecute:
 
 Aimbot_CalcKart2KartVector:
 		subi r3, r6, 0x1
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 		lwz r3, 0x14 (r3)
 		lwz r3, 0x20C (r3)
-		lis r0, "object::KartInfoProxy::getPos()"@h
-		ori r0, r0, "object::KartInfoProxy::getPos()"@l
+		lis r0, "object::KartInfoProxy::getPos"@h
+		ori r0, r0, "object::KartInfoProxy::getPos"@l
 		mtctr r0
 		bctrl
 
@@ -1562,8 +1567,8 @@ Aimbot_CalcKart2KartVector_Next:
 		bge Aimbot_Clear
 
 		mr r3, r7
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 		stw r3, 0x8 (r31)
@@ -1572,8 +1577,8 @@ Aimbot_CalcKart2KartVector_Next:
 Aimbot_CalcAimVector:
 		lwz r3, 0x14 (r12)
 		lwz r3, 0x20C (r3)
-		lis r0, "object::KartInfoProxy::getPos()"@h
-		ori r0, r0, "object::KartInfoProxy::getPos()"@l
+		lis r0, "object::KartInfoProxy::getPos"@h
+		ori r0, r0, "object::KartInfoProxy::getPos"@l
 		mtctr r0
 		bctrl
 		lfs f5, 0 (r3)
@@ -1646,16 +1651,16 @@ BulletBillKiller:
 		beq BulletBillKiller_Exit
 
 		lwz r3, 0 (r31)
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 		mr r30, r3
 
 		lwz r3, 0x14 (r30)
 		lwz r3, 0x20C (r3)
-		lis r0, "object::KartInfoProxy::isJugemHang()"@h
-		ori r0, r0, "object::KartInfoProxy::isJugemHang()"@l
+		lis r0, "object::KartInfoProxy::isJugemHang"@h
+		ori r0, r0, "object::KartInfoProxy::isJugemHang"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
@@ -1663,8 +1668,8 @@ BulletBillKiller:
 
 		lwz r3, 0x4 (r30)
 		lwz r3, 0x8 (r3)
-		lis r0, "object::KartVehicleControl::getRaceController()"@h
-		ori r0, r0, "object::KartVehicleControl::getRaceController()"@l
+		lis r0, "object::KartVehicleControl::getRaceController"@h
+		ori r0, r0, "object::KartVehicleControl::getRaceController"@l
 		mtctr r0
 		bctrl
 		lwz r5, 0x1A4 (r3)
@@ -1681,15 +1686,15 @@ BulletBillKiller:
 		lwzx r0, r12, r0
 		stw r0, 0x8 (r1)
 		addi r3, r1, 0x8
-		lis r0, "object::Sector_GetSector()"@h
-		ori r0, r0, "object::Sector_GetSector()"@l
+		lis r0, "object::Sector_GetSector"@h
+		ori r0, r0, "object::Sector_GetSector"@l
 		mtctr r0
 		bctrl
 		mr r29, r3
 
 		lwz r3, 0x3C (r29)
-		lis r0, "nn::nex::Platform::GetRandomNumber()"@h
-		ori r0, r0, "nn::nex::Platform::GetRandomNumber()"@l
+		lis r0, "nn::nex::Platform::GetRandomNumber"@h
+		ori r0, r0, "nn::nex::Platform::GetRandomNumber"@l
 		mtctr r0
 		bctrl
 		rlwinm r3, r3, 2, 0, 29
@@ -1698,8 +1703,8 @@ BulletBillKiller:
 
 		lwz r3, 0x14 (r30)
 		lwz r3, 0x20C (r3)
-		lis r0, "object::KartInfoProxy::getPos()"@h
-		ori r0, r0, "object::KartInfoProxy::getPos()"@l
+		lis r0, "object::KartInfoProxy::getPos"@h
+		ori r0, r0, "object::KartInfoProxy::getPos"@l
 		mtctr r0
 		bctrl
 		lfs f0, 0x74 (r12)
@@ -1748,16 +1753,16 @@ GliderAtcommand:
 		cmpwi r4, 0
 		beq GliderAtcommand_Exit
 		lwz r3, 0 (r3)
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 		mr r31, r3
 
 		lwz r3, 0x14 (r31)
 		lwz r3, 0x20C (r3)
-		lis r0, "object::KartInfoProxy::isJugemHang()"@h
-		ori r0, r0, "object::KartInfoProxy::isJugemHang()"@l
+		lis r0, "object::KartInfoProxy::isJugemHang"@h
+		ori r0, r0, "object::KartInfoProxy::isJugemHang"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
@@ -1765,8 +1770,8 @@ GliderAtcommand:
 
 		lwz r3, 0x14 (r31)
 		lwz r3, 0x20C (r3)
-		lis r0, "object::KartInfoProxy::isKiller()"@h
-		ori r0, r0, "object::KartInfoProxy::isKiller()"@l
+		lis r0, "object::KartInfoProxy::isKiller"@h
+		ori r0, r0, "object::KartInfoProxy::isKiller"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
@@ -1774,8 +1779,8 @@ GliderAtcommand:
 
 		lwz r3, 0x4 (r31)
 		lwz r3, 0x8 (r3)
-		lis r0, "object::KartVehicleControl::getRaceController()"@h
-		ori r0, r0, "object::KartVehicleControl::getRaceController()"@l
+		lis r0, "object::KartVehicleControl::getRaceController"@h
+		ori r0, r0, "object::KartVehicleControl::getRaceController"@l
 		mtctr r0
 		bctrl
 		lwz r5, 0x1A4 (r3)
@@ -1787,16 +1792,16 @@ GliderAtcommand:
 
 		lwz r3, 0x4 (r31)
 		li r4, -1
-		lis r0, "object::KartVehicle::isInWing()"@h
-		ori r0, r0, "object::KartVehicle::isInWing()"@l
+		lis r0, "object::KartVehicle::isInWing"@h
+		ori r0, r0, "object::KartVehicle::isInWing"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
 		bne GliderAtcommand_Exit
 
 		lwz r3, 0x4 (r31)
-		lis r0, "object::KartVehicle::forceGlide()"@h
-		ori r0, r0, "object::KartVehicle::forceGlide()"@l
+		lis r0, "object::KartVehicle::forceGlide"@h
+		ori r0, r0, "object::KartVehicle::forceGlide"@l
 		mtctr r0
 		bctrl
 		b GliderAtcommand_Exit
@@ -1806,8 +1811,8 @@ GliderAtcommand_TryClose:
 		beq GliderAtcommand_Exit
 
 		lwz r3, 0x4 (r31)
-		lis r0, "object::KartVehicle::forceCloseWing()"@h
-		ori r0, r0, "object::KartVehicle::forceCloseWing()"@l
+		lis r0, "object::KartVehicle::forceCloseWing"@h
+		ori r0, r0, "object::KartVehicle::forceCloseWing"@l
 		mtctr r0
 		bctrl
 
@@ -1830,8 +1835,8 @@ InstantAcceleration:
 		cmpwi r4, 0
 		beq InstantAcceleration_Exit
 		lwz r3, 0 (r3)
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 
@@ -1867,8 +1872,8 @@ InstantAcceleration_getMinAcceleration:
 		lfs f1, InstantAcceleration_Data - ModMenu_Main + CODE_LIST_START_ADDRESS + 0x8@l (r12)
 
 InstantAcceleration_updateKartSpeed:
-		lis r0, "object::KartVehicleMove::setSpeed()"@h
-		ori r0, r0, "object::KartVehicleMove::setSpeed()"@l
+		lis r0, "object::KartVehicleMove::setSpeed"@h
+		ori r0, r0, "object::KartVehicleMove::setSpeed"@l
 		mtctr r0
 		bctrl
 
@@ -1891,8 +1896,8 @@ InstantRespawn:
 		mr r31, r4
 
 		lwz r3, 0 (r3)
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 		lwz r3, 0x4 (r3)
@@ -1905,7 +1910,7 @@ InstantRespawn:
 		lwz r0, 0x34 (r3)
 		stw r0, 0x1C (r3)
 
-		lwz r0, 0x8C (r3) # object_KartJugemRecover_stateFinish
+		lwz r0, 0x8C (r3)
 		stw r0, 0x6C (r3) # object_KartJugemRecover_stateReplay
 		b InstantRespawn_Exit
 
@@ -1914,8 +1919,8 @@ InstantRespawn_Undo:
 		ori r0, r0, 0x7068
 		stw r0, 0x1C (r3)
 
-		lis r0, "object::KartJugemRecover::stateReplay()"@h
-		ori r0, r0, "object::KartJugemRecover::stateReplay()"@l
+		lis r0, "object::KartJugemRecover::stateReplay"@h
+		ori r0, r0, "object::KartJugemRecover::stateReplay"@l
 		stw r0, 0x6C (r3)
 
 InstantRespawn_Exit:
@@ -1938,15 +1943,15 @@ RespawnAtWill:
 		cmpwi r4, 0
 		beq RespawnAtWill_Exit
 		lwz r3, 0 (r3)
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 		lwz r31, 0x4 (r3)
 
 		lwz r3, 0x8 (r31)
-		lis r0, "object::KartVehicleControl::getRaceController()"@h
-		ori r0, r0, "object::KartVehicleControl::getRaceController()"@l
+		lis r0, "object::KartVehicleControl::getRaceController"@h
+		ori r0, r0, "object::KartVehicleControl::getRaceController"@l
 		mtctr r0
 		bctrl
 		lwz r5, 0x1A4 (r3)
@@ -1954,8 +1959,8 @@ RespawnAtWill:
 		beq RespawnAtWill_Exit
 
 		lwz r3, 0x4C (r31)
-		lis r0, "object::KartJugemRecover::startRecover()"@h
-		ori r0, r0, "object::KartJugemRecover::startRecover()"@l
+		lis r0, "object::KartJugemRecover::startRecover"@h
+		ori r0, r0, "object::KartJugemRecover::startRecover"@l
 		mtctr r0
 		bctrl
 
@@ -1982,16 +1987,16 @@ Teleporter:
 		cmpwi r4, 0
 		beq Teleporter_Exit
 		lwz r3, 0 (r3)
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 		mr r30, r3
 
 		lwz r3, 0x14 (r30)
 		lwz r3, 0x20C (r3)
-		lis r0, "object::KartInfoProxy::isJugemHang()"@h
-		ori r0, r0, "object::KartInfoProxy::isJugemHang()"@l
+		lis r0, "object::KartInfoProxy::isJugemHang"@h
+		ori r0, r0, "object::KartInfoProxy::isJugemHang"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
@@ -1999,8 +2004,8 @@ Teleporter:
 
 		lwz r3, 0x4 (r30)
 		lwz r3, 0x8 (r3)
-		lis r0, "object::KartVehicleControl::getRaceController()"@h
-		ori r0, r0, "object::KartVehicleControl::getRaceController()"@l
+		lis r0, "object::KartVehicleControl::getRaceController"@h
+		ori r0, r0, "object::KartVehicleControl::getRaceController"@l
 		mtctr r0
 		bctrl
 		lwz r5, 0x1A4 (r3)
@@ -2015,8 +2020,8 @@ Teleporter_CheckReleaseTimer:
 		beq Teleporter_Exit
 		lwz r3, 0x14 (r30)
 		lwz r3, 0x20C (r3)
-		lis r0, "object::KartInfoProxy::getPos()"@h
-		ori r0, r0, "object::KartInfoProxy::getPos()"@l
+		lis r0, "object::KartInfoProxy::getPos"@h
+		ori r0, r0, "object::KartInfoProxy::getPos"@l
 		mtctr r0
 		bctrl
 		cmpwi r6, 0x20
@@ -2051,8 +2056,8 @@ Teleporter_CheckReleaseTimer:
 		
 		lwz r3, 0x4 (r30)
 		lwz r3, 0x14 (r3)
-		lis r0, "object::KartVehicleMove::forceStop()"@h
-		ori r0, r0, "object::KartVehicleMove::forceStop()"@l
+		lis r0, "object::KartVehicleMove::forceStop"@h
+		ori r0, r0, "object::KartVehicleMove::forceStop"@l
 		mtctr r0
 		bctrl
 		b Teleporter_UpdateTimer
@@ -2109,15 +2114,15 @@ TouchScreenFreefly:
 
 		cmpwi r4, 0
 		beq TouchScreenFreefly_Clear
-		lis r0, "object::RaceIndex_::DRCPlayer2Kart()"@h
-		ori r0, r0, "object::RaceIndex_::DRCPlayer2Kart()"@l
+		lis r0, "object::RaceIndex_::DRCPlayer2Kart"@h
+		ori r0, r0, "object::RaceIndex_::DRCPlayer2Kart"@l
 		mtctr r0
 		bctrl
 		lwz r5, 0 (r31)
 		cmpw r3, r5
 		bne TouchScreenFreefly_Clear
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 		mr r30, r3
@@ -2133,21 +2138,21 @@ TouchScreenFreefly:
 		li r4, 0
 		li r5, 0
 		li r6, 1
-		lis r0, "ui::Control_RaceDRC::setPushButton()"@h
-		ori r0, r0, "ui::Control_RaceDRC::setPushButton()"@l
+		lis r0, "ui::Control_RaceDRC::setPushButton"@h
+		ori r0, r0, "ui::Control_RaceDRC::setPushButton"@l
 		mtctr r0
 		bctrl
 
 		mr r3, r29
-		lis r0, "ui::Control_RaceDRC::forceSetFullScreen()"@h
-		ori r0, r0, "ui::Control_RaceDRC::forceSetFullScreen()"@l
+		lis r0, "ui::Control_RaceDRC::forceSetFullScreen"@h
+		ori r0, r0, "ui::Control_RaceDRC::forceSetFullScreen"@l
 		mtctr r0
 		bctrl
 
 		lwz r3, 0x14 (r30)
 		lwz r3, 0x20C (r3)
-		lis r0, "object::KartInfoProxy::isJugemHang()"@h
-		ori r0, r0, "object::KartInfoProxy::isJugemHang()"@l
+		lis r0, "object::KartInfoProxy::isJugemHang"@h
+		ori r0, r0, "object::KartInfoProxy::isJugemHang"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
@@ -2155,8 +2160,8 @@ TouchScreenFreefly:
 
 		lwz r3, 0x14 (r30)
 		lwz r3, 0x20C (r3)
-		lis r0, "object::KartInfoProxy::isAntiG()"@h
-		ori r0, r0, "object::KartInfoProxy::isAntiG()"@l
+		lis r0, "object::KartInfoProxy::isAntiG"@h
+		ori r0, r0, "object::KartInfoProxy::isAntiG"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
@@ -2164,8 +2169,8 @@ TouchScreenFreefly:
 
 		lwz r3, 0x4 (r30)
 		lwz r3, 0x8 (r3)
-		lis r0, "object::KartVehicleControl::getRaceController()"@h
-		ori r0, r0, "object::KartVehicleControl::getRaceController()"@l
+		lis r0, "object::KartVehicleControl::getRaceController"@h
+		ori r0, r0, "object::KartVehicleControl::getRaceController"@l
 		mtctr r0
 		bctrl
 		lwz r5, 0x1A4 (r3)
@@ -2176,8 +2181,8 @@ TouchScreenFreefly:
 
 		lwz r3, 0x4 (r30)
 		lwz r3, 0x14 (r3)
-		lis r0, "object::KartVehicleMove::forceStop()"@h
-		ori r0, r0, "object::KartVehicleMove::forceStop()"@l
+		lis r0, "object::KartVehicleMove::forceStop"@h
+		ori r0, r0, "object::KartVehicleMove::forceStop"@l
 		mtctr r0
 		bctrl
 
@@ -2202,8 +2207,8 @@ TouchScreenFreefly:
 
 		lwz r3, 0x14 (r30)
 		lwz r3, 0x20C (r3)
-		lis r0, "object::KartInfoProxy::getPos()"@h
-		ori r0, r0, "object::KartInfoProxy::getPos()"@l
+		lis r0, "object::KartInfoProxy::getPos"@h
+		ori r0, r0, "object::KartInfoProxy::getPos"@l
 		mtctr r0
 		bctrl
 		lfs f7, 0 (r3) # Kart X-coordinate
@@ -2254,16 +2259,16 @@ BulletBillToggler:
 		cmpwi r4, 0
 		beq BulletBillToggler_Exit
 		lwz r3, 0 (r3)
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 		mr r31, r3
 
 		lwz r3, 0x14 (r31)
 		lwz r3, 0x20C (r3)
-		lis r0, "object::KartInfoProxy::isJugemHang()"@h
-		ori r0, r0, "object::KartInfoProxy::isJugemHang()"@l
+		lis r0, "object::KartInfoProxy::isJugemHang"@h
+		ori r0, r0, "object::KartInfoProxy::isJugemHang"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
@@ -2271,8 +2276,8 @@ BulletBillToggler:
 
 		lwz r3, 0x4 (r31)
 		lwz r3, 0x8 (r3)
-		lis r0, "object::KartVehicleControl::getRaceController()"@h
-		ori r0, r0, "object::KartVehicleControl::getRaceController()"@l
+		lis r0, "object::KartVehicleControl::getRaceController"@h
+		ori r0, r0, "object::KartVehicleControl::getRaceController"@l
 		mtctr r0
 		bctrl
 		lwz r5, 0x1A4 (r3)
@@ -2283,16 +2288,16 @@ BulletBillToggler:
 
 		lwz r3, 0x14 (r31)
 		lwz r3, 0x20C (r3)
-		lis r0, "object::KartInfoProxy::isKiller()"@h
-		ori r0, r0, "object::KartInfoProxy::isKiller()"@l
+		lis r0, "object::KartInfoProxy::isKiller"@h
+		ori r0, r0, "object::KartInfoProxy::isKiller"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
 		bne BulletBillToggler_Exit
 
 		lwz r3, 0x4 (r31)
-		lis r0, "object::KartVehicle::startKiller()"@h
-		ori r0, r0, "object::KartVehicle::startKiller()"@l
+		lis r0, "object::KartVehicle::startKiller"@h
+		ori r0, r0, "object::KartVehicle::startKiller"@l
 		mtctr r0
 		bctrl
 		b BulletBillToggler_Exit
@@ -2303,8 +2308,8 @@ BulletBillToggler_TryDisable:
 		beq BulletBillToggler_Exit
 
 		lwz r3, 0x4 (r31)
-		lis r0, "object::KartVehicle::endKiller()"@h
-		ori r0, r0, "object::KartVehicle::endKiller()"@l
+		lis r0, "object::KartVehicle::endKiller"@h
+		ori r0, r0, "object::KartVehicle::endKiller"@l
 		mtctr r0
 		bctrl
 
@@ -2340,16 +2345,16 @@ DropItems:
 		bnel InstructionPatcher
 
 		lwz r3, 0 (r31)
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 		mr r30, r3
 
 		lwz r3, 0x4 (r30)
 		lwz r3, 0x8 (r3)
-		lis r0, "object::KartVehicleControl::getRaceController()"@h
-		ori r0, r0, "object::KartVehicleControl::getRaceController()"@l
+		lis r0, "object::KartVehicleControl::getRaceController"@h
+		ori r0, r0, "object::KartVehicleControl::getRaceController"@l
 		mtctr r0
 		bctrl
 		lwz r5, 0x1A4 (r3)
@@ -2369,8 +2374,8 @@ DropItems:
 
 		lwz r3, 0xC (r30)
 		lwz r3, 0x5C (r3)
-		lis r0, "object::ItemOwnerProxy::_clearItemSlot()"@h
-		ori r0, r0, "object::ItemOwnerProxy::_clearItemSlot()"@l
+		lis r0, "object::ItemOwnerProxy::_clearItemSlot"@h
+		ori r0, r0, "object::ItemOwnerProxy::_clearItemSlot"@l
 		mtctr r0
 		bctrl
 		b DropItems_Exit
@@ -2400,8 +2405,8 @@ EnableStar:
 		cmpwi r4, 0
 		beq EnableStar_Exit
 		lwz r3, 0 (r3)
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 
@@ -2432,16 +2437,16 @@ ItemWheel:
 		cmpwi r4, 0
 		beq ItemWheel_Exit
 		lwz r3, 0 (r31)
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 		mr r30, r3
 
 		lwz r3, 0x4 (r30)
 		lwz r3, 0x8 (r3)
-		lis r0, "object::KartVehicleControl::getRaceController()"@h
-		ori r0, r0, "object::KartVehicleControl::getRaceController()"@l
+		lis r0, "object::KartVehicleControl::getRaceController"@h
+		ori r0, r0, "object::KartVehicleControl::getRaceController"@l
 		mtctr r0
 		bctrl
 		lwz r5, 0x1A4 (r3)
@@ -2478,8 +2483,8 @@ ItemWheel_TryUpdateItem:
 		beq ItemWheel_Exit
 
 		mr r3, r12
-		lis r0, "object::ItemOwnerProxy::clearItem()"@h
-		ori r0, r0, "object::ItemOwnerProxy::clearItem()"@l
+		lis r0, "object::ItemOwnerProxy::clearItem"@h
+		ori r0, r0, "object::ItemOwnerProxy::clearItem"@l
 		mtctr r0
 		bctrl
 		b ItemWheel_Exit
@@ -2487,8 +2492,8 @@ ItemWheel_TryUpdateItem:
 ItemWheel_SetItem:
 		mr r3, r12
 		addi r4, r31, 0x3C
-		lis r0, "object::ItemOwnerProxy::setItemForce()"@h
-		ori r0, r0, "object::ItemOwnerProxy::setItemForce()"@l
+		lis r0, "object::ItemOwnerProxy::setItemForce"@h
+		ori r0, r0, "object::ItemOwnerProxy::setItemForce"@l
 		mtctr r0
 		bctrl
 
@@ -2531,16 +2536,16 @@ PiranhaPlantEnabler:
 		cmpwi r4, 0
 		beq PiranhaPlantEnabler_Exit
 		lwz r3, 0 (r3)
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 		mr r31, r3
 
 		lwz r3, 0x14 (r31)
 		lwz r3, 0x20C (r3)
-		lis r0, "object::KartInfoProxy::isPackunItemActive()"@h
-		ori r0, r0, "object::KartInfoProxy::isPackunItemActive()"@l
+		lis r0, "object::KartInfoProxy::isPackunItemActive"@h
+		ori r0, r0, "object::KartInfoProxy::isPackunItemActive"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
@@ -2548,8 +2553,8 @@ PiranhaPlantEnabler:
 
 		lwz r3, 0x4 (r31)
 		lwz r3, 0x8 (r3)
-		lis r0, "object::KartVehicleControl::getRaceController()"@h
-		ori r0, r0, "object::KartVehicleControl::getRaceController()"@l
+		lis r0, "object::KartVehicleControl::getRaceController"@h
+		ori r0, r0, "object::KartVehicleControl::getRaceController"@l
 		mtctr r0
 		bctrl
 		lwz r5, 0x1A4 (r3)
@@ -2558,8 +2563,8 @@ PiranhaPlantEnabler:
 
 		lwz r3, 0x14 (r31)
 		lwz r3, 0x20C (r3)
-		lis r0, 0x0E314878@h
-		ori r0, r0, 0x0E314878@l
+		lis r0, "object::KartInfoProxy::startPackun"@h
+		ori r0, r0, "object::KartInfoProxy::startPackun"@l
 		mtctr r0
 		bctrl
 
@@ -2581,10 +2586,10 @@ RapidFire:
 		stw r31, 0xC (r1)
 		stw r30, 0x8 (r1)
 
-		lis r31, 0x0EC9DC90 + ChangeCameraFOV_PatchData_Length + Moonjump_PatchData_Length + WaterAnywhere_PatchData_Length + 0x18@h
-		ori r31, r31, 0x0EC9DC90 + ChangeCameraFOV_PatchData_Length + Moonjump_PatchData_Length + WaterAnywhere_PatchData_Length + 0x18@l
-		lis r30, "object::ItemDirector::calcKeyInput_EachPlayer_()" + 0x5AC@h
-		ori r30, r30, "object::ItemDirector::calcKeyInput_EachPlayer_()" + 0x5AC@l
+		lis r31, ModMenu_Patches + ChangeCameraFOV_PatchData_Length + Moonjump_PatchData_Length + WaterAnywhere_PatchData_Length + 0x18@h
+		ori r31, r31, ModMenu_Patches + ChangeCameraFOV_PatchData_Length + Moonjump_PatchData_Length + WaterAnywhere_PatchData_Length + 0x18@l
+		lis r30, "object::ItemDirector::calcKeyInput_EachPlayer_" + 0x5AC@h
+		ori r30, r30, "object::ItemDirector::calcKeyInput_EachPlayer_" + 0x5AC@l
 
 		cmpwi r4, 0
 		beq RapidFire_DeleteHook
@@ -2639,8 +2644,8 @@ NoVoiceClipLimit:
 		cmpwi r4, 0
 		beq NoVoiceClipLimit_Exit
 		lwz r3, 0 (r3)
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 		lwz r3, 0x14 (r3)
@@ -2678,8 +2683,8 @@ InstantItems_Undo:
 LightningEnvironment:
 		cmpwi r3, 0
 		beqlr
-		lis r12, 0x1068A710@ha
-		lwz r12, 0x1068A710@l (r12)
+		lis r12, 0x1068A730@ha
+		lwz r12, 0x1068A730@l (r12)
 		lis r11, LightningEnvironment_Data - ModMenu_Main + CODE_LIST_START_ADDRESS + 0x4@ha
 		lfs f0, LightningEnvironment_Data - ModMenu_Main + CODE_LIST_START_ADDRESS + 0x4@l (r11)
 		li r0, 0x40
@@ -2699,8 +2704,8 @@ BestPlayStats:
 		cmpwi r3, 0
 		beq BestPlayStats_Exit
 
-		lis r0, "FUN_0E64E218:sys::SystemEngine::getEngine()"@h
-		ori r0, r0, "FUN_0E64E218:sys::SystemEngine::getEngine()"@l
+		lis r0, "sys::SystemEngine::getEngine"@h
+		ori r0, r0, "sys::SystemEngine::getEngine"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
@@ -2709,8 +2714,8 @@ BestPlayStats:
 		lwz r3, 0x2C8 (r3)
 		lwz r4, 0xE4 (r3)
 		lbz r4, 0x15C (r4)
-		lis r0, "sys::SaveDataManager::getUserSaveDataPtr()"@h
-		ori r0, r0, "sys::SaveDataManager::getUserSaveDataPtr()"@l
+		lis r0, "sys::SaveDataManager::getUserSaveDataPtr"@h
+		ori r0, r0, "sys::SaveDataManager::getUserSaveDataPtr"@l
 		mtctr r0
 		bctrl
 		lwz r3, 0x158 (r3)
@@ -2766,8 +2771,8 @@ UnlockEverything:
 		cmpwi r3, 0
 		beq UnlockEverything_Exit
 
-		lis r0, "FUN_0E64E218:sys::SystemEngine::getEngine()"@h
-		ori r0, r0, "FUN_0E64E218:sys::SystemEngine::getEngine()"@l
+		lis r0, "sys::SystemEngine::getEngine"@h
+		ori r0, r0, "sys::SystemEngine::getEngine"@l
 		mtctr r0
 		bctrl
 		cmpwi r3, 0
@@ -2776,8 +2781,8 @@ UnlockEverything:
 		lwz r3, 0x2C8 (r3)
 		lwz r4, 0xE4 (r3)
 		lbz r4, 0x15C (r4)
-		lis r0, "sys::SaveDataManager::getUserSaveDataPtr()"@h
-		ori r0, r0, "sys::SaveDataManager::getUserSaveDataPtr()"@l
+		lis r0, "sys::SaveDataManager::getUserSaveDataPtr"@h
+		ori r0, r0, "sys::SaveDataManager::getUserSaveDataPtr"@l
 		mtctr r0
 		bctrl
 		lwz r3, 0x158 (r3)
@@ -2882,8 +2887,8 @@ UnlockHomeMenu:
 		beq UnlockHomeMenu_Exit
 
 		li r3, 0
-		lis r0, "ui::LockHome()"@h
-		ori r0, r0, "ui::LockHome()"@l
+		lis r0, "ui::LockHome"@h
+		ori r0, r0, "ui::LockHome"@l
 		mtctr r0
 		bctrl
 
@@ -2955,8 +2960,8 @@ RGBMap:
 		b RGBMap_Exit
 
 RGBMap_Update:
-		lis r0, "FUN_0E64E218:sys::SystemEngine::getEngine()"@h
-		ori r0, r0, "FUN_0E64E218:sys::SystemEngine::getEngine()"@l
+		lis r0, "sys::SystemEngine::getEngine"@h
+		ori r0, r0, "sys::SystemEngine::getEngine"@l
 		mtctr r0
 		bctrl
 		lwz r3, 0 (r3)
@@ -3015,10 +3020,10 @@ ChangeCameraFOV:
 		stw r31, 0xC (r1)
 		stw r30, 0x8 (r1)
 
-		lis r31, 0x0EC9DC90@h
-		ori r31, r31, 0x0EC9DC90@l
-		lis r30, "object::KartCamera::calcFovy()" + 0x25C@h
-		ori r30, r30, "object::KartCamera::calcFovy()" + 0x25C@l
+		lis r31, ModMenu_Patches@h
+		ori r31, r31, ModMenu_Patches@l
+		lis r30, "object::KartCamera::calcFovy" + 0x25C@h
+		ori r30, r30, "object::KartCamera::calcFovy" + 0x25C@l
 
 		cmpwi r3, 0
 		beq ChangeCameraFOV_DeleteHook
@@ -3065,10 +3070,10 @@ Moonjump:
 		stw r31, 0xC (r1)
 		stw r30, 0x8 (r1)
 
-		lis r31, 0x0EC9DC90 + ChangeCameraFOV_PatchData_Length + 0x8@h
-		ori r31, r31, 0x0EC9DC90 + ChangeCameraFOV_PatchData_Length + 0x8@l
-		lis r30, "object::KartVehicleMove::calcMove()" + 0x98@h
-		ori r30, r30, "object::KartVehicleMove::calcMove()" + 0x98@l
+		lis r31, ModMenu_Patches + ChangeCameraFOV_PatchData_Length + 0x8@h
+		ori r31, r31, ModMenu_Patches + ChangeCameraFOV_PatchData_Length + 0x8@l
+		lis r30, "object::KartVehicleMove::calcMove" + 0x98@h
+		ori r30, r30, "object::KartVehicleMove::calcMove" + 0x98@l
 
 		cmpwi r3, 0
 		beq Moonjump_DeleteHook
@@ -3115,10 +3120,10 @@ WaterAnywhere:
 		stw r31, 0xC (r1)
 		stw r30, 0x8 (r1)
 
-		lis r31, 0x0EC9DC90 + ChangeCameraFOV_PatchData_Length + Moonjump_PatchData_Length + 0x10@h
-		ori r31, r31, 0x0EC9DC90 + ChangeCameraFOV_PatchData_Length + Moonjump_PatchData_Length + 0x10@l
-		lis r30, "object::KartVehicle::calcWetAndWater()" + 0x58@h
-		ori r30, r30, "object::KartVehicle::calcWetAndWater()" + 0x58@l
+		lis r31, ModMenu_Patches + ChangeCameraFOV_PatchData_Length + Moonjump_PatchData_Length + 0x10@h
+		ori r31, r31, ModMenu_Patches + ChangeCameraFOV_PatchData_Length + Moonjump_PatchData_Length + 0x10@l
+		lis r30, "object::KartVehicle::calcWetAndWater" + 0x58@h
+		ori r30, r30, "object::KartVehicle::calcWetAndWater" + 0x58@l
 
 		cmpwi r3, 0
 		beq WaterAnywhere_DeleteHook
@@ -3133,8 +3138,8 @@ WaterAnywhere:
 		mr r6, r30
 		bl ASMPatcher
 
-		lis r3, "object::KartVehicle::checkUnderWater()" + 0x100@h
-		ori r3, r3, "object::KartVehicle::checkUnderWater()" + 0x100@l
+		lis r3, "object::KartVehicle::checkUnderWater" + 0x100@h
+		ori r3, r3, "object::KartVehicle::checkUnderWater" + 0x100@l
 		lis r4, 0x6000
 		bl InstructionPatcher
 		b WaterAnywhere_Exit
@@ -3151,10 +3156,10 @@ WaterAnywhere_DeleteHook:
 		li r4, 0
 		bl InstructionPatcher
 
-		lis r3, "object::KartVehicle::checkUnderWater()" + 0x100@h
-		ori r3, r3, "object::KartVehicle::checkUnderWater()" + 0x100@l
+		lis r3, "object::KartVehicle::checkUnderWater" + 0x100@h
+		ori r3, r3, "object::KartVehicle::checkUnderWater" + 0x100@l
 		lis r4, 0x4832
-		ori r4, r4, 0x3759
+		ori r4, r4, 0x3ADD
 		bl InstructionPatcher
 
 WaterAnywhere_Exit:
@@ -3175,8 +3180,8 @@ EnableBulletBillItems:
 		stwu r1, -0x8 (r1)
 
 		cmpwi r3, 0
-		lis r3, "object::ItemDirector::calcKeyInput_EachPlayer_()" + 0x104@ha
-		lwzu r0, "object::ItemDirector::calcKeyInput_EachPlayer_()" + 0x104@l (r3)
+		lis r3, "object::ItemDirector::calcKeyInput_EachPlayer_" + 0x104@ha
+		lwzu r0, "object::ItemDirector::calcKeyInput_EachPlayer_" + 0x104@l (r3)
 		beq EnableBulletBillItems_Undo
 
 		lis r4, 0x3860
@@ -3238,8 +3243,8 @@ UnbreakableItems:
 		stwu r1, -0x8 (r1)
 
 		cmpwi r3, 0
-		lis r3, "object::ItemObjBase::react_Break()"@ha
-		lwzu r0, "object::ItemObjBase::react_Break()"@l (r3)
+		lis r3, "object::ItemObjBase::react_Break"@ha
+		lwzu r0, "object::ItemObjBase::react_Break"@l (r3)
 		beq UnbreakableItems_Undo
 
 		lis r4, 0x4E80
@@ -3269,8 +3274,8 @@ AllowBackwardsDriving:
 		stwu r1, -0x8 (r1)
 
 		cmpwi r3, 0
-		lis r3, "object::LapRankChecker3D::updateReverse_()"@ha
-		lwzu r0, "object::LapRankChecker3D::updateReverse_()"@l (r3)
+		lis r3, "object::LapRankChecker3D::updateReverse_"@ha
+		lwzu r0, "object::LapRankChecker3D::updateReverse_"@l (r3)
 		beq AllowBackwardsDriving_Undo
 
 		lis r4, 0x4E80
@@ -3301,8 +3306,8 @@ DisableAntiGravity:
 		stwu r1, -0x8 (r1)
 
 		cmpwi r3, 0
-		lis r3, "object::LapRankChecker3D::updateGravityDir_()"@ha
-		lwzu r0, "object::LapRankChecker3D::updateGravityDir_()"@l (r3)
+		lis r3, "object::LapRankChecker3D::updateGravityDir_"@ha
+		lwzu r0, "object::LapRankChecker3D::updateGravityDir_"@l (r3)
 		beq DisableAntiGravity_Undo
 
 		lis r4, 0x4E80
@@ -3333,8 +3338,8 @@ DisableBloom:
 		stwu r1, -0x8 (r1)
 
 		cmpwi r3, 0
-		lis r3, "gsys::ModelScenePfx::isBloomEnabled()" + 0x60@ha
-		lwzu r0, "gsys::ModelScenePfx::isBloomEnabled()" + 0x60@l (r3)
+		lis r3, "gsys::ModelScenePfx::isBloomEnabled" + 0x60@ha
+		lwzu r0, "gsys::ModelScenePfx::isBloomEnabled" + 0x60@l (r3)
 		beq DisableBloom_Undo
 
 		lis r4, 0x3860
@@ -3366,163 +3371,163 @@ DisableBoundaries:
 		cmpwi r3, 0
 		beq DisableBoundaries_Undo
 
-		lis r3, "object::KartJugemRecover::calcCheckOnRoad()" + 0x9C@ha
-		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad()" + 0x9C@l (r3)
+		lis r3, "object::KartJugemRecover::calcCheckOnRoad" + 0x9C@ha
+		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad" + 0x9C@l (r3)
 		lis r4, 0x6000
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::KartJugemRecover::calcCheckOnRoad()" + 0x13C@ha
-		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad()" + 0x13C@l (r3)
+		lis r3, "object::KartJugemRecover::calcCheckOnRoad" + 0x13C@ha
+		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad" + 0x13C@l (r3)
 		lis r4, 0x6000
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::KartJugemRecover::calcCheckOnRoad()" + 0x178@ha
-		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad()" + 0x178@l (r3)
+		lis r3, "object::KartJugemRecover::calcCheckOnRoad" + 0x178@ha
+		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad" + 0x178@l (r3)
 		lis r4, 0x6000
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, 0x0E316FF0@ha
-		lwzu r0, 0x0E316FF0@l (r3)
+		lis r3, "object::KartJugemRecover::endValley_" + 0xF8@ha
+		lwzu r0, "object::KartJugemRecover::endValley_" + 0xF8@l (r3)
 		lis r4, 0x6000
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::KartVehicleNet::calcMove()" + 0x19D8@ha
-		lwzu r0, "object::KartVehicleNet::calcMove()" + 0x19D8@l (r3)
+		lis r3, "object::KartVehicleNet::calcMove" + 0x19D8@ha
+		lwzu r0, "object::KartVehicleNet::calcMove" + 0x19D8@l (r3)
 		lis r4, 0x6000
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::KartVehicleNet::calcMove()" + 0x1A30@ha
-		lwzu r0, "object::KartVehicleNet::calcMove()" + 0x1A30@l (r3)
+		lis r3, "object::KartVehicleNet::calcMove" + 0x1A30@ha
+		lwzu r0, "object::KartVehicleNet::calcMove" + 0x1A30@l (r3)
 		lis r4, 0x6000
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::FieldSubMeshCulling::calc()"@ha
-		lwzu r0, "object::FieldSubMeshCulling::calc()"@l (r3)
+		lis r3, "object::FieldSubMeshCulling::calc"@ha
+		lwzu r0, "object::FieldSubMeshCulling::calc"@l (r3)
 		lis r4, 0x4E80
 		ori r4, r4, 0x20
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::KartDirector::calcKarts()" + 0x230@ha
-		lwzu r0, "object::KartDirector::calcKarts()" + 0x230@l (r3)
+		lis r3, "object::KartDirector::calcKarts" + 0x230@ha
+		lwzu r0, "object::KartDirector::calcKarts" + 0x230@l (r3)
 		lis r4, 0x4800
 		ori r4, r4, 0x10
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::KartJugemRecover::calcCheckOnRoad()" + 0xBC@ha
-		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad()" + 0xBC@l (r3)
+		lis r3, "object::KartJugemRecover::calcCheckOnRoad" + 0xBC@ha
+		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad" + 0xBC@l (r3)
 		lis r4, 0x6000
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::KartJugemRecover::calcCheckOnRoad()" + 0x15C@ha
-		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad()" + 0x15C@l (r3)
+		lis r3, "object::KartJugemRecover::calcCheckOnRoad" + 0x15C@ha
+		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad" + 0x15C@l (r3)
 		lis r4, 0x6000
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::KartJugemRecover::calcCheckOnRoad()" + 0x198@ha
-		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad()" + 0x198@l (r3)
+		lis r3, "object::KartJugemRecover::calcCheckOnRoad" + 0x198@ha
+		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad" + 0x198@l (r3)
 		lis r4, 0x6000
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, 0x0E317010@ha
-		lwzu r0, 0x0E317010@l (r3)
+		lis r3, "object::KartJugemRecover::endValley_" + 0x118@ha
+		lwzu r0, "object::KartJugemRecover::endValley_" + 0x118@l (r3)
 		lis r4, 0x6000
 		cmpw r4, r0
 		bnel InstructionPatcher
 		b DisableBoundaries_Exit
 
 DisableBoundaries_Undo:
-		lis r3, "object::KartJugemRecover::calcCheckOnRoad()" + 0x9C@ha
-		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad()" + 0x9C@l (r3)
+		lis r3, "object::KartJugemRecover::calcCheckOnRoad" + 0x9C@ha
+		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad" + 0x9C@l (r3)
 		lis r4, 0x4BFF
 		ori r4, r4, 0xFD3D
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::KartJugemRecover::calcCheckOnRoad()" + 0x13C@ha
-		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad()" + 0x13C@l (r3)
+		lis r3, "object::KartJugemRecover::calcCheckOnRoad" + 0x13C@ha
+		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad" + 0x13C@l (r3)
 		lis r4, 0x4BFF
 		ori r4, r4, 0xFC9D
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::KartJugemRecover::calcCheckOnRoad()" + 0x178@ha
-		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad()" + 0x178@l (r3)
+		lis r3, "object::KartJugemRecover::calcCheckOnRoad" + 0x178@ha
+		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad" + 0x178@l (r3)
 		lis r4, 0x4BFF
 		ori r4, r4, 0xFC61
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, 0x0E316FF0@ha
-		lwzu r0, 0x0E316FF0@l (r3)
+		lis r3, "object::KartJugemRecover::endValley_" + 0xF8@ha
+		lwzu r0, "object::KartJugemRecover::endValley_" + 0xF8@l (r3)
 		lis r4, 0x4BFF
 		ori r4, r4, 0xED91
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::KartVehicleNet::calcMove()" + 0x19D8@ha
-		lwzu r0, "object::KartVehicleNet::calcMove()" + 0x19D8@l (r3)
+		lis r3, "object::KartVehicleNet::calcMove" + 0x19D8@ha
+		lwzu r0, "object::KartVehicleNet::calcMove" + 0x19D8@l (r3)
 		lis r4, 0x4BFB
 		ori r4, r4, 0x6205
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::KartVehicleNet::calcMove()" + 0x1A30@ha
-		lwzu r0, "object::KartVehicleNet::calcMove()" + 0x1A30@l (r3)
+		lis r3, "object::KartVehicleNet::calcMove" + 0x1A30@ha
+		lwzu r0, "object::KartVehicleNet::calcMove" + 0x1A30@l (r3)
 		lis r4, 0x4BFB
 		ori r4, r4, 0x61AD
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::FieldSubMeshCulling::calc()"@ha
-		lwzu r0, "object::FieldSubMeshCulling::calc()"@l (r3)
+		lis r3, "object::FieldSubMeshCulling::calc"@ha
+		lwzu r0, "object::FieldSubMeshCulling::calc"@l (r3)
 		lis r4, 0x9421
 		ori r4, r4, 0xFFC0
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::KartDirector::calcKarts()" + 0x230@ha
-		lwzu r0, "object::KartDirector::calcKarts()" + 0x230@l (r3)
+		lis r3, "object::KartDirector::calcKarts" + 0x230@ha
+		lwzu r0, "object::KartDirector::calcKarts" + 0x230@l (r3)
 		lis r4, 0x4080
 		ori r4, r4, 0x10
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::KartJugemRecover::calcCheckOnRoad()" + 0xBC@ha
-		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad()" + 0xBC@l (r3)
+		lis r3, "object::KartJugemRecover::calcCheckOnRoad" + 0xBC@ha
+		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad" + 0xBC@l (r3)
 		lis r4, 0x4834
-		ori r4, r4, 0xD899
+		ori r4, r4, 0xDC1D
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::KartJugemRecover::calcCheckOnRoad()" + 0x15C@ha
-		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad()" + 0x15C@l (r3)
+		lis r3, "object::KartJugemRecover::calcCheckOnRoad" + 0x15C@ha
+		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad" + 0x15C@l (r3)
 		lis r4, 0x4834
-		ori r4, r4, 0xD7F9
+		ori r4, r4, 0xDB7D
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, "object::KartJugemRecover::calcCheckOnRoad()" + 0x198@ha
-		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad()" + 0x198@l (r3)
+		lis r3, "object::KartJugemRecover::calcCheckOnRoad" + 0x198@ha
+		lwzu r0, "object::KartJugemRecover::calcCheckOnRoad" + 0x198@l (r3)
 		lis r4, 0x4834
-		ori r4, r4, 0xD7BD
+		ori r4, r4, 0xDB41
 		cmpw r4, r0
 		bnel InstructionPatcher
 
-		lis r3, 0x0E317010@ha
-		lwzu r0, 0x0E317010@l (r3)
+		lis r3, "object::KartJugemRecover::endValley_" + 0x118@ha
+		lwzu r0, "object::KartJugemRecover::endValley_" + 0x118@l (r3)
 		lis r4, 0x4834
-		ori r4, r4, 0xC8ED
+		ori r4, r4, 0xCC71
 		cmpw r4, r0
 		bnel InstructionPatcher
 
@@ -3573,8 +3578,8 @@ DisableWallCollisions:
 		stwu r1, -0x8 (r1)
 
 		cmpwi r3, 0
-		lis r3, "object::KartVehicleMove::calcCollisionWall()"@ha
-		lwzu r0, "object::KartVehicleMove::calcCollisionWall()"@l (r3)
+		lis r3, "object::KartVehicleMove::calcCollisionWall"@ha
+		lwzu r0, "object::KartVehicleMove::calcCollisionWall"@l (r3)
 		beq DisableWallCollisions_Undo
 
 		lis r4, 0x4E80
@@ -3605,8 +3610,8 @@ InfiniteLaps:
 		stwu r1, -0x8 (r1)
 
 		cmpwi r3, 0
-		lis r3, "object::LapRankChecker3D::calcLapPosition_()" + 0x1A8@ha
-		lwzu r0, "object::LapRankChecker3D::calcLapPosition_()" + 0x1A8@l (r3)
+		lis r3, "object::LapRankChecker3D::calcLapPosition_" + 0x1A8@ha
+		lwzu r0, "object::LapRankChecker3D::calcLapPosition_" + 0x1A8@l (r3)
 		beq InfiniteLaps_Undo
 
 		lis r4, 0x6000
@@ -3684,8 +3689,8 @@ DisableAI:
 		stwu r1, -0x8 (r1)
 
 		cmpwi r3, 0
-		lis r3, "object::KartDirector::calcAI()" + 0x48@ha
-		lwzu r0, "object::KartDirector::calcAI()" + 0x48@l (r3)
+		lis r3, "object::KartDirector::calcAI" + 0x48@ha
+		lwzu r0, "object::KartDirector::calcAI" + 0x48@l (r3)
 		beq DisableAI_Undo
 
 		lis r4, 0x3860
@@ -3716,8 +3721,8 @@ NoBulletBillSFX:
 		stwu r1, -0x8 (r1)
 
 		cmpwi r3, 0
-		lis r3, 0x0E1EC17C@ha
-		lwzu r0, 0x0E1EC17C@l (r3)
+		lis r3, "audio::AudSoundObjKart::updateCurParam" + 0x114@ha
+		lwzu r0, "audio::AudSoundObjKart::updateCurParam" + 0x114@l (r3)
 		beq NoBulletBillSFX_Undo
 
 		lis r4, 0x3860
@@ -3747,8 +3752,8 @@ NoOnlineDisconnection:
 		stwu r1, -0x8 (r1)
 
 		cmpwi r3, 0
-		lis r3, "net::IsErrorOccured()" + 0x44@ha
-		lwzu r0, "net::IsErrorOccured()" + 0x44@l (r3)
+		lis r3, "net::IsErrorOccured" + 0x44@ha
+		lwzu r0, "net::IsErrorOccured" + 0x44@l (r3)
 		beq NoOnlineDisconnection_Undo
 
 		lis r4, 0x3860
@@ -3810,8 +3815,8 @@ NoStarTheme:
 		stwu r1, -0x8 (r1)
 
 		cmpwi r3, 0
-		lis r3, 0x0E1EC138@ha
-		lwzu r0, 0x0E1EC138@l (r3)
+		lis r3, "audio::AudSoundObjKart::updateCurParam" + 0xD0@ha
+		lwzu r0, "audio::AudSoundObjKart::updateCurParam" + 0xD0@l (r3)
 		beq NoStarTheme_Undo
 
 		lis r4, 0x3860
@@ -4065,8 +4070,8 @@ Moonjump_PatchData:
 Moonjump_PatchData_NextSlot:
 		lwzx r3, r30, r29
 		lwz r3, 0 (r3)
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 		lwz r5, 0x4 (r3)
@@ -4077,8 +4082,8 @@ Moonjump_PatchData_NextSlot:
 
 		lwz r3, 0x4 (r3)
 		lwz r3, 0x8 (r3)
-		lis r0, "object::KartVehicleControl::getRaceController()"@h
-		ori r0, r0, "object::KartVehicleControl::getRaceController()"@l
+		lis r0, "object::KartVehicleControl::getRaceController"@h
+		ori r0, r0, "object::KartVehicleControl::getRaceController"@l
 		mtctr r0
 		bctrl
 		lwz r5, 0x1A4 (r3)
@@ -4124,8 +4129,8 @@ WaterAnywhere_PatchData:
 WaterAnywhere_PatchData_NextSlot:
 		lwzx r3, r31, r30
 		lwz r3, 0 (r3)
-		lis r0, "object::KartInfoProxy::getKartUnit()"@h
-		ori r0, r0, "object::KartInfoProxy::getKartUnit()"@l
+		lis r0, "object::KartInfoProxy::getKartUnit"@h
+		ori r0, r0, "object::KartInfoProxy::getKartUnit"@l
 		mtctr r0
 		bctrl
 		lwz r5, 0x4 (r3)
@@ -4992,10 +4997,10 @@ UnlockHomeMenu_Dialog:
 	.align 0x2
 
 VPADLib:
-		.string "vpad.rpl" # OSDynLoad_Acquire() char const
+		.string "vpad.rpl" # OSDynLoad_Acquire char const
 
 VPADSymbol_VPADSetTVMenuInvalid:
-		.string "VPADSetTVMenuInvalid" # OSDynLoad_FindExport() char const
+		.string "VPADSetTVMenuInvalid" # OSDynLoad_FindExport char const
 
 	.align 0x2
 
