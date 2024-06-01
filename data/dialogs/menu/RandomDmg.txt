@@ -1,0 +1,2 @@
+There's a %ls1%ls in %ls500%ls chance a player gets
+randomly damaged.

@@ -1,0 +1,14 @@
+
+           -- MARIO KART 8 MOD MENU (Ver. 1.0) --
+                        by Mewtality
+
+
+ - Press [A] to INSTALL...
+ - Press [B] to EXIT and resume game...
+
+
+
+INFO:
+* The mod menu is only usable through a WII U GAMEPAD.
+* Press [ZR + R] to OPEN the mod menu.
+* All local players are able to use cheats.

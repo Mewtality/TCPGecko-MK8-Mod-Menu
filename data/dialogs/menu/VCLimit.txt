@@ -1,0 +1,2 @@
+Whether character voice lines should
+be restricted to one line per action.

@@ -1,0 +1,2 @@
+Race timers will be stopped.
+This allows everlasting offline games.

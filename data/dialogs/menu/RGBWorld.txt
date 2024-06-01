@@ -1,0 +1,4 @@
+The main source of light cycles
+through %lsred%ls, %lsgreen%ls and %lsblue%ls.
+
+%ls%ls%ls May cause slower performance.

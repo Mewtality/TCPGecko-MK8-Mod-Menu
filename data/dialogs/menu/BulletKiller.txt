@@ -1,0 +1,2 @@
+Perform a %lsspin-turn%ls while holding %ls%ls%ls to
+mimic a ultra fast bullet bill.

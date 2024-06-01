@@ -1,0 +1,1 @@
+Mute the bullet bill sound effects.

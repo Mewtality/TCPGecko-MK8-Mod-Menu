@@ -1,0 +1,1 @@
+Whether race boundaries are enabled.

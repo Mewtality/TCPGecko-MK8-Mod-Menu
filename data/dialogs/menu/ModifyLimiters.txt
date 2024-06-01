@@ -1,0 +1,4 @@
+Sets all item limiters to %ls12%ls.
+This allows multiple blue shells.
+
+%ls%ls%ls Start a new race for changes to apply.

@@ -1,0 +1,2 @@
+%lsBump%ls to a kart to start the bot.
+If the kart is too far, the bot will be stopped.

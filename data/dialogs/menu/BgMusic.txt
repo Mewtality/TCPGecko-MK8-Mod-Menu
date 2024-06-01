@@ -1,0 +1,1 @@
+Whether the game's background music should play.

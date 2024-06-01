@@ -1,0 +1,1 @@
+Sets the account's play stats to max.

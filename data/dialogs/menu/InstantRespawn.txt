@@ -1,0 +1,2 @@
+Lakitu instantly places players
+back on the track.

@@ -1,0 +1,2 @@
+Invert the kart's gravity by holding the
+%lsjump%ls button.

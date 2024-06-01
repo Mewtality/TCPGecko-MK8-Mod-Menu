@@ -1,0 +1,3 @@
+Allow players to select any items at will.
+
+Tap %ls%ls + %ls%ls buttons to select.

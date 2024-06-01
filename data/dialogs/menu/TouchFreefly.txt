@@ -1,0 +1,3 @@
+Move the kart based on touch screen input.
+This only applies to the player with a
+Wii U GamePad %ls%ls%ls.

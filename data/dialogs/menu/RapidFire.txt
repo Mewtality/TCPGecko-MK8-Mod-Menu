@@ -1,0 +1,3 @@
+Allow players to throw items
+automatically when holding down the
+"use item" button.
